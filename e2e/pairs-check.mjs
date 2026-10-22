@@ -8,6 +8,7 @@ const phone = async (who, tab) => {
   const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })).newPage();
   p.on('pageerror', (e) => errors.push(e.message));
   await p.goto('http://localhost:8081');
+  await p.getByTestId('open-demo').click();
   if (tab) { await p.getByTestId('seg-TECHNICIAN').waitFor({ timeout: 60000 }); await p.getByTestId('seg-TECHNICIAN').click(); }
   await p.getByTestId(`demo-${who}`).click();
   return p;

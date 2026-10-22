@@ -8,6 +8,7 @@ const fresh = async () => {
   const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })).newPage();
   p.on('pageerror', (e) => errors.push(e.message));
   await p.goto('http://localhost:8081');
+  await p.getByTestId('open-demo').click();
   await p.getByTestId('demo-search').waitFor({ timeout: 60000 });
   return p;
 };

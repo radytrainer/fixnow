@@ -8,6 +8,7 @@ const errors = []; p.on('pageerror', (e) => errors.push(e.message));
 const tid = (id) => p.getByTestId(id);
 const shot = async (n) => { await p.waitForTimeout(500); await p.screenshot({ path: `screenshots/mobile/${n}.png` }); console.log('📸', n); };
 await p.goto('http://localhost:8081');
+await tid('open-demo').click();
 await tid('demo-+85512000101').click();
 await p.getByText('What needs fixing today?').waitFor({ timeout: 30000 });
 

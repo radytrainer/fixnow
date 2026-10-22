@@ -3,6 +3,7 @@ import { chromium } from 'playwright';
 const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 412, height: 900 } });
 const errors = []; p.on('pageerror', (e) => errors.push(e.message));
 await p.goto('http://localhost:8081');
+await p.getByTestId('open-login').click();
 const phone = `09${Math.floor(1000000 + Math.random() * 8999999)}`;
 await p.getByTestId('phone-input').fill(phone);
 await p.getByTestId('send-code').click();
@@ -17,7 +18,9 @@ await input.fill(`DEMO: SMS not sent. Your code is ${code}`); await check('paste
 await input.fill(''); await p.getByTestId('use-demo-code').click(); await check('"Use this code" button', code);
 
 await p.getByTestId('verify-code').click();
-await p.getByText('New number — how will you use FixNow?').waitFor({ timeout: 10000 });
+// Unknown number on Log in → Create account, with the same phone and code carried over
+await p.getByText(/No account uses this number yet/).waitFor({ timeout: 10000 });
+await p.getByTestId('register-name').fill('OTP Check');
 await p.getByTestId('verify-code').click();
 await p.getByText('What needs fixing today?').waitFor({ timeout: 15000 });
 console.log('PASS signed in with the 6-digit code');

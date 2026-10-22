@@ -38,16 +38,16 @@ console.log('\n▶ A. New technician signs up via OTP and onboards');
 const phone = `0${Math.floor(10000000 + Math.random() * 89999999)}`; // local format 0XXXXXXXX
 const tech = await page(true);
 await tech.goto(MOBILE);
+await tid(tech, 'open-register').click();
+await tid(tech, 'role-TECHNICIAN').click();
+await tid(tech, 'register-name').fill('Chantha Prak');
 await tid(tech, 'phone-input').fill(phone);
+await shot(tech, '20-signup-role-choice');
 await tid(tech, 'send-code').click();
 const codeText = await tech.getByText(/DEMO: SMS not sent/).textContent();
 const otp = codeText.match(/(\d{6})/)[1];
 await tid(tech, 'code-input').fill(otp);
 await tid(tech, 'verify-code').click();
-await tech.getByText('New number — how will you use FixNow?').waitFor();
-await tech.getByText('I am a technician').click();
-await shot(tech, '20-signup-role-choice');
-await tid(tech, 'verify-code').click(); // same code, now with role
 await tech.getByText('Become a FixNow technician').waitFor({ timeout: 15000 });
 await tid(tech, 'onboard-name').fill('Chantha Prak');
 await tid(tech, 'onboard-years').fill('6');
@@ -99,6 +99,7 @@ console.log('  ✓ approved → technician app unlocked automatically');
 console.log('\n▶ B. Request expires → customer re-sends to another technician');
 const cust = await page(true);
 await cust.goto(MOBILE);
+await tid(cust, 'open-demo').click();
 await tid(cust, 'demo-+85512000102').click();
 await tid(cust, 'category-AC').click();
 await tid(cust, 'service-AC Cleaning').click();

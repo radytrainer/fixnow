@@ -57,6 +57,7 @@ console.log('  ✓ Bopha approved');
 // 2. Customer books AC Repair with the newly approved technician
 step('Customer app: sign in, choose AC Repair, book Bopha');
 await customer.goto(MOBILE);
+await tid(customer, 'open-demo').click();
 await tid(customer, 'demo-+85512000101').click();
 await customer.getByText('What needs fixing today?').waitFor({ timeout: 30000 });
 await shot(customer, '03-customer-home');
@@ -78,6 +79,7 @@ await shot(customer, '06-customer-waiting-countdown');
 // 3. Technician sees the request (coarse area only), accepts, then sees the exact address
 step('Technician app: incoming request → accept → start → finish $25');
 await tech.goto(MOBILE);
+await tid(tech, 'open-demo').click();
 await tid(tech, 'seg-TECHNICIAN').click();
 await tid(tech, 'demo-+85512000204').click();
 await tid(tech, `incoming-${code}`).waitFor({ timeout: 20000 });

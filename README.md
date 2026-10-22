@@ -171,7 +171,7 @@ npm run test:e2e             # full booking flow; needs the API, admin and mobil
 | Technician | Sophea Lim | +85512000202 | Electrician: live request, awaiting customer payment |
 | Technician | Bopha Nuon | +85512000204 | **Pending** — approve her live in the demo |
 
-In the app, tap a card under *Demo accounts*; technicians are on the **Technicians** tab. No SMS is sent. Full details are in [`docs/DEMO_DATA.md`](docs/DEMO_DATA.md).
+In the app, tap **Try demo accounts** on the start screen, then a card; technicians are on the **Technicians** tab. Real users use **Log in** or **Create account** (phone number + 6-digit code; in DEMO_MODE the code is shown on screen). No SMS is sent. Full details are in [`docs/DEMO_DATA.md`](docs/DEMO_DATA.md).
 
 ## Competition demo script (one booking through all three interfaces)
 

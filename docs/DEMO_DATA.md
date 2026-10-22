@@ -31,7 +31,7 @@ The dataset is deliberately small: 3 customers and 3 technicians, so every name 
 
 **Admin dashboard** (http://localhost:3000): `+85512000001` / `FixNowAdmin#2026` (Ops). A finance admin, `+85512000002`, uses the same password.
 
-**Mobile app:** tap a card under *Demo accounts*; technicians are on the **Technicians** tab. Open each person in a **separate browser window** (or a private window) so you can watch both sides at once.
+**Mobile app:** tap **Try demo accounts** on the start screen, then a card; technicians are on the **Technicians** tab. Open each person in a **separate browser window** (or a private window) so you can watch both sides at once.
 
 | Account | Phone | Role |
 |---|---|---|

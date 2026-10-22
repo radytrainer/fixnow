@@ -15,6 +15,7 @@ async function phone() {
   const p = await ctx.newPage();
   p.on('pageerror', (e) => errors.push(e.message));
   await p.goto(MOBILE);
+  await p.getByTestId('open-demo').click();
   return p;
 }
 const tid = (p, id) => p.getByTestId(id);
