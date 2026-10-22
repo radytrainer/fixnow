@@ -5,8 +5,8 @@
  * charts, countdowns and the 3-day warranty window always look current after a reset.
  * All payments are DEMO (simulated). Khmer strings are machine-assisted and need native review.
  *
- * Contents: 4 categories / 23 services, 12 customers, 14 technicians (10 approved, 2 pending,
- * 1 rejected, 1 suspended), ~90 bookings in every status (incl. 3 live 5-minute requests),
+ * Contents: 4 categories / 21 services (AC and electrical bookable), 3 customers, 3 technicians
+ * (2 approved, 1 pending), ~40 bookings in every status (incl. 3 live 5-minute requests),
  * payments, payouts, ratings, warranty claims, support tickets, notifications and an audit trail.
  */
 import { MAX_TECHNICIAN_DISTANCE_KM, distanceKm, findArea } from '../../packages/shared/src/areas';
@@ -48,7 +48,7 @@ type Area = string;
 const CATEGORIES = [
   { code: 'AC', en: 'Air Conditioning', km: 'ម៉ាស៊ីនត្រជាក់', icon: 'ac', status: 'ACTIVE' },
   { code: 'ELECTRICAL', en: 'Electrical', km: 'អគ្គិសនី', icon: 'bolt', status: 'ACTIVE' },
-  { code: 'PLUMBING', en: 'Plumbing', km: 'ប្រព័ន្ធទឹក', icon: 'drop', status: 'ACTIVE' },
+  { code: 'PLUMBING', en: 'Plumbing', km: 'ប្រព័ន្ធទឹក', icon: 'drop', status: 'COMING_SOON' },
   { code: 'APPLIANCES', en: 'Home Appliances', km: 'គ្រឿងប្រើប្រាស់ក្នុងផ្ទះ', icon: 'washer', status: 'COMING_SOON' },
 ] as const;
 
@@ -67,11 +67,11 @@ const SERVICES = [
   ['elFan', 'ELECTRICAL', 'Ceiling Fan Installation', 'តម្លើងកង្ហារពិដាន', 'Mount and wire a ceiling fan with wall control.', 'តម្លើង និងតភ្ជាប់កង្ហារពិដានជាមួយកុងតាក់។', '12.00', '30.00'],
   ['elHeater', 'ELECTRICAL', 'Water Heater Wiring', 'តភ្ជាប់ភ្លើងម៉ាស៊ីនកម្តៅទឹក', 'Dedicated circuit and safe wiring for shower heaters.', 'ខ្សែភ្លើងដាច់ដោយឡែក និងសុវត្ថិភាពសម្រាប់ម៉ាស៊ីនកម្តៅទឹក។', '15.00', '45.00'],
   ['elSafety', 'ELECTRICAL', 'Electrical Safety Inspection', 'ត្រួតពិនិត្យសុវត្ថិភាពអគ្គិសនី', 'Full home check before moving in: earthing, RCD, overloads.', 'ពិនិត្យផ្ទះទាំងមូលមុនចូលនៅ៖ ខ្សែដី RCD និងការផ្ទុកលើស។', '15.00', '30.00'],
-  ['plLeak', 'PLUMBING', 'Pipe Leak Repair', 'ជួសជុលបំពង់ទឹកលេច', 'Find and fix leaking pipes, joints and valves (PVC / PPR).', 'ស្វែងរក និងជួសជុលបំពង់ សន្លាក់ និងវ៉ាល់លេចទឹក។', '10.00', '40.00'],
-  ['plDrain', 'PLUMBING', 'Drain Unclogging', 'ដោះស្ទះលូ', 'Clear blocked sinks, floor drains and shower drains.', 'ដោះស្ទះលិចទឹក លូឥដ្ឋ និងលូបន្ទប់ទឹក។', '10.00', '35.00'],
-  ['plToilet', 'PLUMBING', 'Toilet Repair', 'ជួសជុលបង្គន់', 'Running or leaking toilets, flush valves, blocked toilets.', 'បង្គន់ហូរទឹកមិនឈប់ លេច ឬស្ទះ ជួសជុលប្រដាប់ចុចទឹក។', '10.00', '40.00'],
-  ['plPump', 'PLUMBING', 'Water Pump Repair', 'ជួសជុលម៉ាស៊ីនបូមទឹក', 'Low water pressure, pump not starting, pressure tank issues.', 'សម្ពាធទឹកខ្សោយ ម៉ាស៊ីនបូមមិនដើរ បញ្ហាធុងសម្ពាធ។', '15.00', '60.00'],
-  ['plFaucet', 'PLUMBING', 'Faucet & Sink Installation', 'តម្លើងក្បាលរ៉ូប៊ីណេ និងលិចទឹក', 'Install or replace taps, sinks, shower sets and hoses.', 'តម្លើង ឬប្តូរក្បាលរ៉ូប៊ីណេ លិចទឹក ឈុតផ្កាឈូក និងទុយោ។', '8.00', '30.00'],
+  ['plLeak', 'PLUMBING', 'Pipe Leak Repair', 'ជួសជុលបំពង់ទឹកលេច', 'Find and fix leaking pipes, joints and valves (PVC / PPR).', 'ស្វែងរក និងជួសជុលបំពង់ សន្លាក់ និងវ៉ាល់លេចទឹក។', '10.00', '40.00', 'COMING_SOON'],
+  ['plDrain', 'PLUMBING', 'Drain Unclogging', 'ដោះស្ទះលូ', 'Clear blocked sinks, floor drains and shower drains.', 'ដោះស្ទះលិចទឹក លូឥដ្ឋ និងលូបន្ទប់ទឹក។', '10.00', '35.00', 'COMING_SOON'],
+  ['plToilet', 'PLUMBING', 'Toilet Repair', 'ជួសជុលបង្គន់', 'Running or leaking toilets, flush valves, blocked toilets.', 'បង្គន់ហូរទឹកមិនឈប់ លេច ឬស្ទះ ជួសជុលប្រដាប់ចុចទឹក។', '10.00', '40.00', 'COMING_SOON'],
+  ['plPump', 'PLUMBING', 'Water Pump Repair', 'ជួសជុលម៉ាស៊ីនបូមទឹក', 'Low water pressure, pump not starting, pressure tank issues.', 'សម្ពាធទឹកខ្សោយ ម៉ាស៊ីនបូមមិនដើរ បញ្ហាធុងសម្ពាធ។', '15.00', '60.00', 'COMING_SOON'],
+  ['plFaucet', 'PLUMBING', 'Faucet & Sink Installation', 'តម្លើងក្បាលរ៉ូប៊ីណេ និងលិចទឹក', 'Install or replace taps, sinks, shower sets and hoses.', 'តម្លើង ឬប្តូរក្បាលរ៉ូប៊ីណេ លិចទឹក ឈុតផ្កាឈូក និងទុយោ។', '8.00', '30.00', 'COMING_SOON'],
   ['apWasher', 'APPLIANCES', 'Washing Machine Repair', 'ជួសជុលម៉ាស៊ីនបោកខោអាវ', 'Coming soon.', 'នឹងមកដល់ឆាប់ៗ។', '15.00', '50.00', 'COMING_SOON'],
   ['apFridge', 'APPLIANCES', 'Refrigerator Repair', 'ជួសជុលទូទឹកកក', 'Coming soon.', 'នឹងមកដល់ឆាប់ៗ។', '20.00', '70.00', 'COMING_SOON'],
   ['apTv', 'APPLIANCES', 'TV Wall Mounting', 'តម្លើងទូរទស្សន៍លើជញ្ជាំង', 'Coming soon.', 'នឹងមកដល់ឆាប់ៗ។', '10.00', '30.00', 'COMING_SOON'],
@@ -116,17 +116,6 @@ const CUSTOMERS = [
   ['sokha', '+85512000101', 'Sokha Chan', 'en', 'PHNOM_PENH_THMEI', 'Borey Peng Huoth The Star Platinum, St. 1986, House 12B', true],
   ['dara', '+85512000102', 'Dara Kim', 'km', 'TUEK_THLA', 'Street 598, House 45, near Tuek Thla market', true],
   ['malis', '+85512000103', 'Malis Ouk', 'en', 'PHNOM_PENH_THMEI', 'Sen Sok City, Block C, Unit 7', true],
-  ['pisey', '+85512000104', 'Pisey Nhem', 'km', 'TUEK_THLA', 'Borey Vimean Phnom Penh, St. 371, House 88', false],
-  ['rotha', '+85512000105', 'Rotha Seng', 'en', 'PHNOM_PENH_THMEI', 'St. 1003, near Phnom Penh Thmei market, Flat 3A', false],
-  ['lina', '+85512000106', 'Lina Tan', 'en', 'PHNOM_PENH_THMEI', 'Borey Chankiri, St. 2011, House 21', false],
-  ['chenda', '+85512000107', 'Chenda Hok', 'km', 'TUEK_THLA', 'St. 1019, House 14, Tuek Thla commune', false],
-  ['bunthoeun', '+85512000108', 'Bunthoeun Ros', 'km', 'PHNOM_PENH_THMEI', 'Borey Sopheakmongkol, St. 2002, House 5', false],
-  ['sreynich', '+85512000109', 'Sreynich Vann', 'en', 'TUEK_THLA', 'Rose Condo, Tower B, Room 1204', false],
-  ['mony', '+85512000110', 'Mony Chea', 'km', 'PHNOM_PENH_THMEI', 'St. 1928, House 9, behind AEON Mall Sen Sok', false],
-  ['kanha', '+85512000111', 'Kanha Pov', 'en', 'TUEK_THLA', 'Borey New World, St. 598, House 302', false],
-  ['david', '+85512000112', 'David Lee', 'en', 'PHNOM_PENH_THMEI', 'Sen Sok City, Block F, Unit 19', false],
-  ['sophie', '+85512000113', 'Sophie Martin', 'en', 'PP_BOENG_KENG_KANG', 'St. 278, Apartment 4B, BKK1', false],
-  ['vibol', '+85512000114', 'Vibol Chhay', 'km', 'PV_SIEM_REAP', 'Wat Bo Road, House 33, Siem Reap town', false],
 ] as const;
 type CustomerKey = typeof CUSTOMERS[number][0];
 
@@ -136,25 +125,8 @@ interface TechSpec {
 }
 const TECHS: TechSpec[] = [
   { key: 'vannak', phone: '+85512000201', name: 'Vannak Sok', bio: 'AC specialist, Daikin & Panasonic trained. Clean, on time, explains the fix.', years: 7, area: 'PHNOM_PENH_THMEI', status: 'APPROVED', services: ['acClean', 'acRepair', 'acGas', 'acInstall', 'acMaint'], cert: 'NTTI Refrigeration & AC Certificate (2018)', idNo: '010203045', demo: true, joinedDaysAgo: 60, skill: 1.05 },
-  { key: 'sophea', phone: '+85512000202', name: 'Sophea Lim', bio: 'Licensed electrician for homes and shophouses. Safety first.', years: 5, area: 'TUEK_THLA', status: 'APPROVED', services: ['elWiring', 'elOutlet', 'elBreaker', 'elLight', 'elHeater'], cert: 'Electrical Installation Level 2, Don Bosco Technical School', idNo: '020304056', demo: true, joinedDaysAgo: 58, skill: 0.8 },
-  { key: 'rithy', phone: '+85512000203', name: 'Rithy Heng', bio: 'AC and electrical all-rounder. Weekend availability.', years: 4, area: 'TUEK_THLA', status: 'APPROVED', services: ['acClean', 'acRepair', 'elOutlet', 'elLight'], cert: 'Basic AC Servicing Certificate', idNo: '030405067', demo: true, joinedDaysAgo: 55, skill: 0.75 },
-  { key: 'dararith', phone: '+85512000206', name: 'Dararith Chea', bio: '9 years in residential wiring. Breakers, fans and full safety inspections.', years: 9, area: 'PHNOM_PENH_THMEI', status: 'APPROVED', services: ['elWiring', 'elBreaker', 'elFan', 'elSafety', 'elHeater'], cert: 'EDC-registered electrician; RCD testing course (2021)', idNo: '060708091', demo: false, joinedDaysAgo: 52, skill: 0.85 },
-  { key: 'sovann', phone: '+85512000207', name: 'Sovann Pich', bio: 'AC installs and gas refills. Brings his own vacuum pump and gauges.', years: 5, area: 'PHNOM_PENH_THMEI', status: 'APPROVED', services: ['acClean', 'acGas', 'acInstall', 'acMove'], cert: 'Refrigerant Handling Certificate (2020)', idNo: '070809102', demo: false, joinedDaysAgo: 48, skill: 0.7 },
-  { key: 'kimsour', phone: '+85512000208', name: 'Kimsour Ly', bio: 'Repairs inverter ACs and small electrical jobs.', years: 6, area: 'TUEK_THLA', status: 'APPROVED', services: ['acRepair', 'acMaint', 'elOutlet', 'elWiring'], cert: 'Inverter AC Repair Workshop, Samsung Academy', idNo: '080910113', demo: false, joinedDaysAgo: 45, skill: 0.8 },
-  { key: 'phearom', phone: '+85512000209', name: 'Phearom Tep', bio: 'Lighting and fan installs. Neat cable work.', years: 3, area: 'PHNOM_PENH_THMEI', status: 'APPROVED', services: ['elLight', 'elFan', 'elOutlet'], cert: 'Electrical Basics Level 1, PPI', idNo: '091011124', demo: false, joinedDaysAgo: 40, skill: 0.7 },
-  { key: 'chanthy', phone: '+85512000210', name: 'Chanthy Mao', bio: 'New to FixNow. AC cleaning and seasonal check-ups.', years: 2, area: 'TUEK_THLA', status: 'APPROVED', services: ['acClean', 'acMaint'], cert: 'AC Servicing Short Course (2023)', idNo: '101112135', demo: false, joinedDaysAgo: 12, skill: 0.65 },
-  { key: 'narin', phone: '+85512000211', name: 'Narin Keo', bio: 'Senior electrician. Water heaters, breakers and rewiring.', years: 11, area: 'PHNOM_PENH_THMEI', status: 'APPROVED', services: ['elHeater', 'elWiring', 'elBreaker', 'elSafety'], cert: 'Electrical Engineering Diploma, ITC', idNo: '111213146', demo: false, joinedDaysAgo: 50, skill: 0.92 },
-  { key: 'sreymom', phone: '+85512000212', name: 'Sreymom Chhun', bio: 'AC installation and relocation. Careful with walls and finishes.', years: 8, area: 'TUEK_THLA', status: 'APPROVED', services: ['acInstall', 'acMove', 'acGas', 'acClean'], cert: 'Daikin Certified Installer (2019)', idNo: '121314157', demo: false, joinedDaysAgo: 47, skill: 0.88 },
-  { key: 'sokun', phone: '+85512000215', name: 'Sokun Prak', bio: 'Covers Tuol Kouk, Russey Keo and Sen Sok. Electrical and AC cleaning.', years: 6, area: 'PP_TUOL_KOUK', status: 'APPROVED', services: ['elWiring', 'elOutlet', 'elLight', 'acClean'], cert: 'Electrical Installation Level 2, NPIC', idNo: '151617180', demo: false, joinedDaysAgo: 30, skill: 0.82 },
-  { key: 'channa', phone: '+85512000216', name: 'Channa Ouk', bio: 'AC technician for condos in BKK1, Chamkar Mon and Doun Penh.', years: 7, area: 'PP_CHAMKAR_MON', status: 'APPROVED', services: ['acClean', 'acRepair', 'acGas', 'acMaint'], cert: 'Mitsubishi Electric Service Training (2020)', idNo: '161718191', demo: false, joinedDaysAgo: 26, skill: 0.85 },
-  { key: 'rachana', phone: '+85512000217', name: 'Rachana Mok', bio: 'Siem Reap based. Guesthouses and homes: AC and electrical.', years: 5, area: 'PV_SIEM_REAP', status: 'APPROVED', services: ['acClean', 'acRepair', 'elWiring', 'elLight'], cert: 'Siem Reap Provincial Training Centre', idNo: '171819202', demo: false, joinedDaysAgo: 20, skill: 0.8 },
-  { key: 'piseth', phone: '+85512000218', name: 'Piseth Long', bio: 'Plumber for houses and condos: leaks, drains, toilets and pumps. Brings common spare parts.', years: 8, area: 'PHNOM_PENH_THMEI', status: 'APPROVED', services: ['plLeak', 'plDrain', 'plToilet', 'plPump', 'plFaucet'], cert: 'Plumbing & Sanitation Certificate, NTTI (2017)', idNo: '181920213', demo: true, joinedDaysAgo: 56, skill: 0.95 },
-  { key: 'sambath', phone: '+85512000219', name: 'Sambath Nhim', bio: 'Leak detection and drain cleaning. Fast response in Tuek Thla.', years: 5, area: 'TUEK_THLA', status: 'APPROVED', services: ['plLeak', 'plDrain', 'plToilet'], cert: 'Water Supply Technician Course, PPWSA', idNo: '192021224', demo: false, joinedDaysAgo: 44, skill: 0.8 },
-  { key: 'kunthea', phone: '+85512000220', name: 'Kunthea Rin', bio: 'Faucets, sinks and water pumps. Neat silicone work.', years: 4, area: 'PP_SS_OU_BAEK_KAAM', status: 'APPROVED', services: ['plFaucet', 'plPump', 'plLeak'], cert: 'Plumbing Basics, Don Bosco Technical School', idNo: '202122235', demo: false, joinedDaysAgo: 33, skill: 0.78 },
-  { key: 'vichea', phone: '+85512000213', name: 'Vichea Sam', bio: 'Applied this week. AC cleaning and lighting.', years: 2, area: 'TUEK_THLA', status: 'PENDING', services: ['acClean', 'elLight'], cert: 'AC Cleaning Course (2024)', idNo: '131415168', demo: false, joinedDaysAgo: 2, skill: 0.6 },
+  { key: 'sophea', phone: '+85512000202', name: 'Sophea Lim', bio: 'Licensed electrician for homes and shophouses. Also cleans and repairs ACs. Safety first.', years: 5, area: 'TUEK_THLA', status: 'APPROVED', services: ['elWiring', 'elOutlet', 'elBreaker', 'elLight', 'elHeater', 'acClean', 'acRepair'], cert: 'Electrical Installation Level 2, Don Bosco Technical School', idNo: '020304056', demo: true, joinedDaysAgo: 58, skill: 0.8 },
   { key: 'bopha', phone: '+85512000204', name: 'Bopha Nuon', bio: 'New to FixNow. 3 years at an AC shop in Toul Kork.', years: 3, area: 'PHNOM_PENH_THMEI', status: 'PENDING', services: ['acClean', 'acRepair'], cert: 'AC Technician Short Course (2022)', idNo: '040506078', demo: true, joinedDaysAgo: 1, skill: 0.7 },
-  { key: 'vuthy', phone: '+85512000214', name: 'Vuthy Heng', bio: 'Electrician.', years: 1, area: 'PHNOM_PENH_THMEI', status: 'REJECTED', services: ['elOutlet'], cert: 'None provided', idNo: '141516179', demo: false, reason: 'ID card photo unreadable and no certificate provided. Please re-upload.', joinedDaysAgo: 9, skill: 0.5 },
-  { key: 'kosal', phone: '+85512000205', name: 'Kosal Meas', bio: 'Electrician.', years: 2, area: 'TUEK_THLA', status: 'SUSPENDED', services: ['elWiring'], cert: 'None provided', idNo: '050607089', demo: true, reason: 'Repeated no-shows (demo data)', joinedDaysAgo: 35, skill: 0.4 },
 ];
 
 // ---------------------------------------------------------------- seed
@@ -278,11 +250,11 @@ export async function seedDemo(q: Q, opts: { adminPasswordHash: string; makeDocu
   // 1) History: past 30 days, weighted toward AC (hot season) and recent growth.
   let disputed = 0, refunded = 0;
   for (let d = 30; d >= 1; d--) {
-    const count = Math.round(between(1, 3) + (30 - d) / 12);
+    const count = Math.round(between(0.2, 1.4) + (30 - d) / 40);
     for (let k = 0; k < count; k++) {
-      const customer = pick(CUSTOMERS.slice(3))[0];
+      const customer = pick(CUSTOMERS)[0];
       const r = rnd();
-      const prefix = r < 0.5 ? 'ac' : r < 0.8 ? 'el' : 'pl';
+      const prefix = r < 0.6 ? 'ac' : 'el';
       const service = pick(activeKeys.filter((s) => s.startsWith(prefix)));
       const t = techFor(service, cust[customer].area);
       if (!t) continue; // nobody nearby offers it
@@ -291,25 +263,13 @@ export async function seedDemo(q: Q, opts: { adminPasswordHash: string; makeDocu
         : { RATED: 35, PAID: 30, EXPIRED: 10, CANCELLED: 10, DECLINED: 5 } as Record<Status, number>);
       if (status === 'DISPUTED' && ++disputed > 2) status = 'RATED';
       if (status === 'REFUNDED' && ++refunded > 2) status = 'RATED';
-      if (t === 'kosal') continue;
       // ~20% of visits combine a second service the same technician offers (e.g. cleaning + gas refill)
       const companions = tech[t].services.filter((x) => x !== service && x.slice(0, 2) === service.slice(0, 2));
       const extra = companions.length && rnd() < 0.2 ? [pick(companions)] : undefined;
       plans.push({ customer, tech: t, service, extra, status, createdAt: now - d * DAY - between(7, 19) * HOUR });
     }
   }
-  // Kosal's history before suspension (a no-show and a poor rating)
-  plans.push({ customer: 'chenda', tech: 'kosal', service: 'elWiring', status: 'CUSTOMER_NOT_AVAILABLE', createdAt: now - 12 * DAY });
-  plans.push({ customer: 'pisey', tech: 'kosal', service: 'elWiring', status: 'RATED', score: 2, comment: 'Arrived 2 hours late and left before finishing.', createdAt: now - 9 * DAY });
-
-  // 2) Hand-crafted stories for the demo accounts.
-  plans.push(
-    { customer: 'vibol', tech: 'rachana', service: 'acClean', status: 'RATED', score: 5, comment: 'Fast and tidy, cleaned all 4 guesthouse units.', amount: '28.00', payout: 'PAID', createdAt: now - 14 * DAY },
-    { customer: 'vibol', tech: 'rachana', service: 'elLight', status: 'RATED', score: 4, amount: '24.00', payout: 'PAID', createdAt: now - 6 * DAY },
-    { customer: 'sophie', tech: 'channa', service: 'acRepair', extra: ['acGas'], status: 'RATED', score: 5, comment: 'Explained everything in English. Great!', amount: '68.00', payout: 'PROCESSING', createdAt: now - 5 * DAY },
-    { customer: 'sophie', tech: 'channa', service: 'acClean', status: 'ACCEPTED', createdAt: now - 4 * HOUR, scheduledAt: now + 28 * HOUR },
-  );
-  // Demo pairs: every booking below involves a demo customer AND a demo technician,
+  // 2) Demo pairs: every booking below involves a demo customer AND a demo technician,
   // so the same booking can be opened from both apps (and in the admin dashboard).
   plans.push(
     // Sokha <-> Vannak (AC): history, paid job inside the warranty window, upcoming visit tomorrow
@@ -319,29 +279,19 @@ export async function seedDemo(q: Q, opts: { adminPasswordHash: string; makeDocu
     // Sokha <-> Sophea (electrical): job finished, waiting for Sokha to pay $18
     { customer: 'sokha', tech: 'sophea', service: 'elLight', status: 'RATED', score: 4, comment: 'Good job, arrived 15 minutes late.', amount: '22.50', payout: 'PAID', createdAt: now - 11 * DAY },
     { customer: 'sokha', tech: 'sophea', service: 'elOutlet', status: 'FINISHED', amount: '18.00', createdAt: now - 6 * HOUR },
-    // Sokha <-> Piseth (plumbing): rated toilet repair
-    { customer: 'sokha', tech: 'piseth', service: 'plToilet', status: 'RATED', score: 5, comment: 'Fixed the running toilet in 20 minutes. Very polite.', amount: '15.00', payout: 'PAID', createdAt: now - 7 * DAY },
     // Dara <-> Sophea (electrical): job IN PROGRESS now; Sophea can finish it, then Dara pays
     { customer: 'dara', tech: 'sophea', service: 'elBreaker', status: 'RATED', score: 4, comment: 'ធ្វើការល្អ ប៉ុន្តែមកយឺតបន្តិច។', amount: '30.00', payout: 'PAID', createdAt: now - 18 * DAY },
     { customer: 'dara', tech: 'sophea', service: 'elWiring', status: 'CONFIRMED', createdAt: now - 2 * HOUR, scheduledAt: now - 30 * MIN },
-    // Dara <-> Rithy (AC): history + an expired request (plus a LIVE request below)
-    { customer: 'dara', tech: 'rithy', service: 'acRepair', status: 'RATED', score: 5, comment: 'ជាងមកដល់ទាន់ពេល ធ្វើការស្អាត។ អរគុណច្រើន!', amount: '40.00', payout: 'PAID', createdAt: now - 10 * DAY },
-    { customer: 'dara', tech: 'rithy', service: 'elOutlet', status: 'EXPIRED', createdAt: now - 3 * DAY },
-    // Malis <-> Vannak (AC) and Malis <-> Piseth (plumbing): history (plus LIVE requests below)
+    // Dara <-> Vannak (AC): history, a recent paid job (warranty claim below) and an expired request (plus a LIVE request below)
+    { customer: 'dara', tech: 'vannak', service: 'acRepair', status: 'RATED', score: 5, comment: 'ជាងមកដល់ទាន់ពេល ធ្វើការស្អាត។ អរគុណច្រើន!', amount: '40.00', payout: 'PAID', createdAt: now - 10 * DAY },
+    { customer: 'dara', tech: 'vannak', service: 'acClean', status: 'PAID', amount: '25.00', payout: 'PENDING', createdAt: now - 1 * DAY - 3 * HOUR },
+    { customer: 'dara', tech: 'vannak', service: 'acMaint', status: 'EXPIRED', createdAt: now - 3 * DAY },
+    // Malis <-> Vannak (AC): history and an installation IN PROGRESS now (plus a LIVE request below)
     { customer: 'malis', tech: 'vannak', service: 'acRepair', extra: ['acGas'], status: 'RATED', score: 5, comment: 'Repair and gas refill in one visit. AC is cold again!', amount: '72.00', payout: 'PROCESSING', createdAt: now - 4 * DAY },
-    { customer: 'malis', tech: 'piseth', service: 'plDrain', status: 'RATED', score: 5, comment: 'Shower drain flows like new.', amount: '20.00', payout: 'PAID', createdAt: now - 9 * DAY },
-    { customer: 'malis', tech: 'dararith', service: 'elSafety', status: 'RATED', score: 5, comment: 'Thorough check, gave me a written list of issues.', amount: '25.00', payout: 'PAID', createdAt: now - 16 * DAY },
-    // Other customers so every technician dashboard has work
-    { customer: 'rotha', tech: 'vannak', service: 'acInstall', status: 'CONFIRMED', createdAt: now - 4 * HOUR, scheduledAt: now - 1 * HOUR },
-    { customer: 'kanha', tech: 'rithy', service: 'elLight', status: 'ACCEPTED', createdAt: now - 5 * HOUR, scheduledAt: now + 26 * HOUR },
-    { customer: 'kanha', tech: 'piseth', service: 'plFaucet', status: 'ACCEPTED', createdAt: now - 2 * HOUR, scheduledAt: now + 22 * HOUR },
-    { customer: 'pisey', tech: 'piseth', service: 'plPump', status: 'PAID', amount: '45.00', payout: 'PENDING', createdAt: now - 1 * DAY - 8 * HOUR },
-    { customer: 'david', tech: 'narin', service: 'elHeater', status: 'FINISHED', amount: '32.00', createdAt: now - 7 * HOUR },
-    { customer: 'lina', tech: 'sovann', service: 'acMove', status: 'ACCEPTED', createdAt: now - 20 * HOUR, scheduledAt: now + 44 * HOUR },
-    { customer: 'sreynich', tech: 'sreymom', service: 'acInstall', status: 'PAID', amount: '65.00', payout: 'PENDING', createdAt: now - 2 * DAY },
-    { customer: 'mony', tech: 'dararith', service: 'elFan', status: 'PAID', amount: '20.00', payout: 'PENDING', createdAt: now - 1 * DAY - 2 * HOUR },
-    { customer: 'bunthoeun', tech: 'kimsour', service: 'acRepair', status: 'RATED', score: 4, amount: '45.00', payout: 'PENDING', createdAt: now - 2 * DAY - 4 * HOUR },
-    { customer: 'chenda', tech: 'sambath', service: 'plLeak', status: 'RATED', score: 4, comment: 'Found the leak quickly.', amount: '28.00', payout: 'PROCESSING', createdAt: now - 3 * DAY },
+    { customer: 'malis', tech: 'vannak', service: 'acInstall', status: 'CONFIRMED', createdAt: now - 4 * HOUR, scheduledAt: now - 1 * HOUR },
+    // Malis <-> Sophea (electrical): history and an upcoming visit (plus a LIVE request below)
+    { customer: 'malis', tech: 'sophea', service: 'elHeater', status: 'RATED', score: 5, comment: 'Thorough work, explained the new breaker to me.', amount: '32.00', payout: 'PAID', createdAt: now - 16 * DAY },
+    { customer: 'malis', tech: 'sophea', service: 'elLight', status: 'ACCEPTED', createdAt: now - 5 * HOUR, scheduledAt: now + 26 * HOUR },
   );
 
   plans.sort((a, b) => a.createdAt - b.createdAt);
@@ -453,8 +403,8 @@ export async function seedDemo(q: Q, opts: { adminPasswordHash: string; makeDocu
   // 3) Live requests right now (5-minute countdowns running when the demo starts).
   const live: Array<[CustomerKey, string, ServiceKey, string, number, ServiceKey[]?]> = [
     ['malis', 'vannak', 'acRepair', 'AC in the master bedroom is leaking water onto the bed. Probably also needs gas.', 10_000, ['acGas']],
-    ['dara', 'rithy', 'acClean', 'Please clean 2 wall units before my family visits.', 20_000],
-    ['malis', 'piseth', 'plLeak', 'Kitchen sink pipe is leaking under the cabinet.', 30_000],
+    ['dara', 'vannak', 'acClean', 'Please clean 2 wall units before my family visits.', 20_000],
+    ['malis', 'sophea', 'elOutlet', 'Add a new outlet next to the bed.', 30_000],
   ];
   for (const [ck, tk, sk, problem, ageMs, extra] of live) {
     const c = cust[ck];
@@ -502,10 +452,10 @@ export async function seedDemo(q: Q, opts: { adminPasswordHash: string; makeDocu
   const refundedBooking = (await one(`SELECT id, customer_id FROM bookings WHERE status = 'REFUNDED' ORDER BY created_at DESC LIMIT 1`));
   const tickets: Array<[string, string | null, string, string, string, string | null, number]> = [
     [tech.sophea.userId, null, 'PAYMENT', 'When will I receive my payout for last week?', 'OPEN', null, 1],
-    [cust.pisey.id, null, 'ACCOUNT', 'How do I change my home address? I moved to Tuek Thla.', 'RESOLVED', 'You can edit it in Profile → Home location. We updated it for you.', 6],
-    [cust.david.id, null, 'GENERAL', 'Do you plan to offer plumbing soon? My sink is leaking.', 'IN_REVIEW', 'Plumbing launches after the pilot. We will notify you.', 3],
-    [tech.kimsour.userId, null, 'ACCOUNT', 'I want to add AC Installation to my services.', 'OPEN', null, 2],
-    [cust.chenda.id, null, 'SAFETY', 'Technician did not wear any ID badge. Is this normal?', 'CLOSED', 'All technicians are verified; we reminded the technician to show his FixNow profile on arrival.', 12],
+    [cust.dara.id, null, 'ACCOUNT', 'How do I change my home address? I moved to Tuek Thla.', 'RESOLVED', 'You can edit it in Profile → Home location. We updated it for you.', 6],
+    [cust.malis.id, null, 'GENERAL', 'Do you plan to offer plumbing soon? My sink is leaking.', 'IN_REVIEW', 'Plumbing launches after the pilot. We will notify you.', 3],
+    [tech.vannak.userId, null, 'ACCOUNT', 'I want to add AC Relocation to my services.', 'OPEN', null, 2],
+    [cust.sokha.id, null, 'SAFETY', 'Technician did not wear any ID badge. Is this normal?', 'CLOSED', 'All technicians are verified; we reminded the technician to show his FixNow profile on arrival.', 12],
   ];
   if (disputedBooking) tickets.push([disputedBooking.customer_id, disputedBooking.id, 'DISPUTE', 'The AC stopped cooling again the next day. I want the technician to come back or a refund.', 'IN_REVIEW', 'Reviewing with the technician. Booking marked as disputed.', 4]);
   if (refundedBooking) tickets.push([refundedBooking.customer_id, refundedBooking.id, 'QUALITY', 'The job was left half done and the technician did not answer.', 'RESOLVED', 'Refund recorded (demo). Technician received a warning.', 8]);
@@ -524,11 +474,11 @@ export async function seedDemo(q: Q, opts: { adminPasswordHash: string; makeDocu
   }
 
   // Featured demo accounts are listed first on the sign-in screen (the others follow by name).
-  const FEATURED = ['+85512000101', '+85512000102', '+85512000103', '+85512000201', '+85512000202', '+85512000203', '+85512000218', '+85512000204', '+85512000205'];
+  const FEATURED = ['+85512000101', '+85512000102', '+85512000103', '+85512000201', '+85512000202', '+85512000204'];
   for (const [rank, phone] of FEATURED.entries()) await q(`UPDATE users SET demo_rank = $2 WHERE phone_e164 = $1`, [phone, rank + 1]);
 
   return {
-    admin, sokha: cust.sokha.id, dara: cust.dara.id, vannak: tech.vannak.id, sophea: tech.sophea.id, rithy: tech.rithy.id,
+    admin, sokha: cust.sokha.id, dara: cust.dara.id, vannak: tech.vannak.id, sophea: tech.sophea.id,
     services: {
       acClean: svc.acClean.id, acRepair: svc.acRepair.id, acGas: svc.acGas.id, acInstall: svc.acInstall.id,
       elWiring: svc.elWiring.id, elOutlet: svc.elOutlet.id, elBreaker: svc.elBreaker.id, elLight: svc.elLight.id,

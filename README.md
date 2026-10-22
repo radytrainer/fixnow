@@ -152,11 +152,11 @@ npm run test:e2e             # full booking flow; needs the API, admin and mobil
 
 ## Demo accounts and data (DEMO_MODE=true)
 
-`npm run db:reset` loads a full demo dataset:
-- 21 services (AC, electrical and plumbing bookable; home appliances coming soon) and 14 customers.
-- 14 technicians (approved, pending, rejected and suspended).
-- About 115 bookings in every status, including 3 live 5-minute requests.
-- Payments, payouts, ratings, warranty claims, support tickets, notifications and an audit trail.
+`npm run db:reset` loads a small, focused demo dataset:
+- 21 services (AC and electrical bookable; plumbing and home appliances coming soon).
+- 3 customers and 3 technicians (2 approved, 1 pending approval).
+- 43 bookings in every status, including 3 live 5-minute requests.
+- Payments, payouts, ratings, a warranty claim, support tickets, notifications and an audit trail.
 
 **Reset just before presenting** so the live countdowns are running.
 
@@ -166,15 +166,12 @@ npm run test:e2e             # full booking flow; needs the API, admin and mobil
 | Admin | Visal (Finance) | +85512000002 / FixNowAdmin#2026 | Second admin in the audit log |
 | Customer | Sokha Chan | +85512000101 | Upcoming job, payment due, warranty-eligible job |
 | Customer | Dara Kim | +85512000102 | Khmer UI, job in progress |
-| Customer | Malis Ouk | +85512000103 | Rated history |
-| Technician | Vannak Sok | +85512000201 | Live request, in-progress job, earnings |
-| Technician | Sophea Lim | +85512000202 | Electrician, awaiting customer payment |
-| Technician | Rithy Heng | +85512000203 | Live request, upcoming job |
-| Technician | Piseth Long | +85512000218 | Plumber: live request from Malis |
+| Customer | Malis Ouk | +85512000103 | Live requests, job in progress, rated history |
+| Technician | Vannak Sok | +85512000201 | AC: live requests, in-progress job, earnings |
+| Technician | Sophea Lim | +85512000202 | Electrician: live request, awaiting customer payment |
 | Technician | Bopha Nuon | +85512000204 | **Pending** — approve her live in the demo |
-| Technician | Kosal Meas | +85512000205 | Suspended |
 
-In the app, tap a card under *Demo accounts*; technicians are on the **Technicians** tab. **Every seeded customer and technician can be signed into** (featured ones first, with a search box), so any name you see in the app can be opened. No SMS is sent. Full details are in [`docs/DEMO_DATA.md`](docs/DEMO_DATA.md).
+In the app, tap a card under *Demo accounts*; technicians are on the **Technicians** tab. No SMS is sent. Full details are in [`docs/DEMO_DATA.md`](docs/DEMO_DATA.md).
 
 ## Competition demo script (one booking through all three interfaces)
 

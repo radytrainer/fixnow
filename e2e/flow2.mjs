@@ -100,12 +100,12 @@ console.log('\n▶ B. Request expires → customer re-sends to another technicia
 const cust = await page(true);
 await cust.goto(MOBILE);
 await tid(cust, 'demo-+85512000102').click();
-await tid(cust, 'category-ELECTRICAL').click();
-await tid(cust, 'service-Outlet & Switch Install').click();
+await tid(cust, 'category-AC').click();
+await tid(cust, 'service-AC Cleaning').click();
 await tid(cust, 'services-continue').click();
-await tid(cust, 'tech-Rithy Heng').click();
+await tid(cust, 'tech-Vannak Sok').click();
 await tid(cust, 'book-technician').click();
-await tid(cust, 'problem-input').fill('Kitchen socket sparks when plugging in the kettle.');
+await tid(cust, 'problem-input').fill('Two bedroom units need cleaning, airflow is weak.');
 await tid(cust, 'submit-booking').click();
 await tid(cust, 'countdown').waitFor({ timeout: 15000 });
 const code = (await cust.getByText(/^(Booking|ការកក់) FN-\d+$/).textContent()).match(/FN-\d+/)[0];

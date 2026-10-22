@@ -57,7 +57,7 @@ before(async () => {
   tokens.sokha = await demoLogin('+85512000101');
   tokens.dara = await demoLogin('+85512000102');
   tokens.vannak = await demoLogin('+85512000201');
-  tokens.rithy = await demoLogin('+85512000203');
+  tokens.sophea = await demoLogin('+85512000202');
   tokens.bopha = await demoLogin('+85512000204'); // PENDING technician
   const admin = await api('POST', '/auth/admin-login', undefined, { phone: '+85512000001', password: 'FixNowAdmin#2026' });
   assert.equal(admin.status, 200);
@@ -119,7 +119,7 @@ describe('authentication & roles', () => {
 describe('catalogue & discovery', () => {
   test('coming-soon categories are listed but cannot be booked', async () => {
     const cats = (await api('GET', '/services')).body.items;
-    assert.equal(cats.find((c: any) => c.code === 'PLUMBING').status, 'ACTIVE');
+    assert.equal(cats.find((c: any) => c.code === 'PLUMBING').status, 'COMING_SOON');
     const appliances = cats.find((c: any) => c.code === 'APPLIANCES');
     assert.equal(appliances.status, 'COMING_SOON');
     const admin = (await api('GET', '/admin/services', tokens.admin)).body.items;
@@ -174,11 +174,11 @@ describe('booking lifecycle', () => {
     assert.equal(before.body.serviceArea, 'PHNOM_PENH_THMEI');
     assert.ok(!before.raw.includes('Borey Peng Huoth'));
     // other technician cannot view at all
-    assert.equal((await api('GET', `/bookings/${b.id}`, tokens.rithy)).status, 403);
+    assert.equal((await api('GET', `/bookings/${b.id}`, tokens.sophea)).status, 403);
     // other customer cannot view
     assert.equal((await api('GET', `/bookings/${b.id}`, tokens.dara)).status, 403);
     // other technician cannot accept
-    assert.equal((await api('POST', `/bookings/${b.id}/accept`, tokens.rithy)).status, 403);
+    assert.equal((await api('POST', `/bookings/${b.id}/accept`, tokens.sophea)).status, 403);
     const acc = await api('POST', `/bookings/${b.id}/accept`, tokens.vannak);
     assert.equal(acc.status, 200, acc.raw);
     assert.equal(acc.body.serviceAddressText, 'Borey Peng Huoth, House 12B');
@@ -225,7 +225,7 @@ describe('booking lifecycle', () => {
     // payment QR not available before finished
     assert.equal((await api('POST', `/bookings/${b.id}/payment/qr`, tokens.sokha)).status, 409);
     // only assigned technician can finish
-    assert.equal((await api('POST', `/bookings/${b.id}/finish`, tokens.rithy, { amount: '25.00' })).status, 403);
+    assert.equal((await api('POST', `/bookings/${b.id}/finish`, tokens.sophea, { amount: '25.00' })).status, 403);
     // rating locked before payment
     assert.equal((await api('POST', `/bookings/${b.id}/ratings`, tokens.sokha, { score: 5 })).status, 409);
     const start = await api('POST', `/bookings/${b.id}/start`, tokens.vannak);
@@ -289,8 +289,8 @@ describe('booking lifecycle', () => {
     assert.equal(w.status, 201, w.raw);
     const techWarranty = await api('GET', '/warranty', tokens.vannak);
     assert.ok(techWarranty.body.items.some((x: any) => x.bookingId === b.id));
-    const rithyWarranty = await api('GET', '/warranty', tokens.rithy);
-    assert.ok(!rithyWarranty.body.items.some((x: any) => x.bookingId === b.id));
+    const sopheaWarranty = await api('GET', '/warranty', tokens.sophea);
+    assert.ok(!sopheaWarranty.body.items.some((x: any) => x.bookingId === b.id));
   });
 
   test('warranty is refused after the 3-day window', async () => {
@@ -373,11 +373,10 @@ describe('service areas across Cambodia', () => {
     const pp = await api('GET', `/technicians?serviceId=${ids.services.acClean}&area=PHNOM_PENH_THMEI`, tokens.sokha);
     const ppNames = pp.body.items.map((t: any) => t.name);
     assert.ok(ppNames.includes('Vannak Sok'));
-    assert.ok(!ppNames.includes('Rachana Mok'), 'Siem Reap technician is too far from Sen Sok');
     assert.ok(pp.body.items.every((t: any) => t.distanceKm === null || t.distanceKm <= 30));
 
     const sr = await api('GET', `/technicians?serviceId=${ids.services.acClean}&area=PV_SIEM_REAP`, tokens.sokha);
-    assert.deepEqual(sr.body.items.map((t: any) => t.name), ['Rachana Mok']);
+    assert.equal(sr.body.items.length, 0, 'Sen Sok technicians are too far from Siem Reap');
 
     const far = await api('GET', `/technicians?serviceId=${ids.services.acClean}&area=PV_RATANAKIRI`, tokens.sokha);
     assert.equal(far.body.items.length, 0, 'nobody serves Ratanakiri yet');
@@ -409,7 +408,7 @@ describe('multi-service bookings', () => {
     const r = await api('GET', `/technicians?serviceIds=${ids.services.acClean},${ids.services.elOutlet}`, tokens.sokha);
     assert.equal(r.status, 200);
     const names = r.body.items.map((t: any) => t.name);
-    assert.ok(names.includes('Rithy Heng'), 'Rithy does AC cleaning and outlets');
+    assert.ok(names.includes('Sophea Lim'), 'Sophea does AC cleaning and outlets');
     assert.ok(!names.includes('Vannak Sok'), 'Vannak does not do electrical');
     assert.ok(r.body.items.every((t: any) => [ids.services.acClean, ids.services.elOutlet].every((s) => t.serviceIds.includes(s))));
   });
@@ -479,11 +478,10 @@ describe('notifications', () => {
     assert.ok(techN.body.items.some((n: any) => n.bookingId === b.id && n.type === 'BOOKING_EXPIRED_TECH'));
   });
 
-  test('technician is notified when approved', async () => {
-    const pending = (await api('GET', '/admin/technicians?status=SUSPENDED', tokens.admin)).body.items[0];
-    await api('POST', `/admin/technicians/${pending.id}/reinstate`, tokens.admin);
-    const kosal = await demoLogin('+85512000205');
-    const n = await api('GET', '/notifications', kosal);
+  test('technician is notified when reinstated', async () => {
+    assert.equal((await api('POST', `/admin/technicians/${ids.sophea}/suspend`, tokens.admin, { reason: 'Test suspension' })).status, 200);
+    assert.equal((await api('POST', `/admin/technicians/${ids.sophea}/reinstate`, tokens.admin)).status, 200);
+    const n = await api('GET', '/notifications', tokens.sophea);
     assert.equal(n.body.items[0].type, 'TECHNICIAN_REINSTATED');
   });
 });
@@ -530,7 +528,7 @@ describe('uploads, profile photo, pagination, rate limit', () => {
     assert.notEqual(p2.body.items[0].id, r.body.items[0].id);
     const t = await api('GET', '/admin/technicians?pageSize=1', tokens.admin);
     assert.equal(t.body.items.length, 1);
-    assert.ok(t.body.total >= 5);
+    assert.ok(t.body.total >= 3);
   });
 
   test('admin login is rate limited per phone', async () => {
