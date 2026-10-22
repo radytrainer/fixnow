@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+/*
+ * FixNow admin design tokens. Light-only operations UI.
+ * One accent (brand blue); orange is reserved for DEMO/simulated labels; status colors only for state.
+ */
+@theme inline {
+  --font-sans: var(--font-jakarta), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #eff4ff;
+  --color-brand-100: #dbe6fe;
+  --color-brand-500: #3b74f0;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+
+  --color-canvas: #f6f7f9;     /* page background */
+  --color-surface: #ffffff;    /* cards, sidebar, top bar */
+  --color-line: #e6e8ec;       /* borders and dividers */
+  --color-line-soft: #f0f1f4;
+  --color-ink: #0f172a;        /* primary text */
+  --color-ink-2: #475569;      /* secondary text */
+  --color-ink-3: #64748b;      /* muted text (≥4.5:1 on white) */
+
+  /* Categorical chart slots (validated palette, adjacent-pair safe for 4) */
+  --color-series-1: #2a78d6;
+  --color-series-2: #eb6834;
+  --color-series-3: #1baf7a;
+  --color-series-4: #eda100;
+
+  --radius-card: 14px;
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 1px rgb(15 23 42 / 0.03);
+  --shadow-pop: 0 12px 32px -8px rgb(15 23 42 / 0.18), 0 2px 6px rgb(15 23 42 / 0.06);
+}
+
+:root {
+  color-scheme: light;
+}
+
+html, body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-jakarta), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:lang(km) body { line-height: 1.65; }
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Thin, quiet scrollbars for the sidebar and drawers */
+.scroll-thin { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+
+/*
+ * Responsive tables: below 768px each row becomes a labelled card.
+ * Labels come from data-label attributes that <Table> stamps onto cells from its headers.
+ */
+@media (max-width: 767px) {
+  .rtable thead { display: none; }
+  .rtable, .rtable tbody, .rtable tr, .rtable td { display: block; width: 100%; }
+  .rtable { min-width: 0 !important; }
+  .rtable tr {
+    margin: 0 0 12px; padding: 6px 14px; border: 1px solid var(--color-line);
+    border-radius: 12px; background: var(--color-surface);
+  }
+  .rtable tbody { border: 0 !important; }
+  .rtable td {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 8px 0 !important; border-bottom: 1px solid var(--color-line-soft); text-align: right;
+  }
+  .rtable td:last-child { border-bottom: 0; }
+  .rtable td::before {
+    content: attr(data-label); flex: none; max-width: 45%; text-align: left;
+    font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--color-ink-3);
+  }
+  .rtable td[data-label=""]::before { content: none; }
+  .rtable td[data-label=""] { justify-content: flex-end; }
+}
+
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes slide-in { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes slide-in-left { from { transform: translateX(-100%); } to { transform: none; } }
+@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+.anim-fade { animation: fade-in .18s ease-out; }
+.anim-drawer { animation: slide-in .22s cubic-bezier(.2,.8,.2,1); }
+.anim-drawer-left { animation: slide-in-left .22s cubic-bezier(.2,.8,.2,1); }
+.skeleton {
+  background: linear-gradient(90deg, #eef0f3 0, #f6f7f9 40px, #eef0f3 80px) #eef0f3;
+  background-size: 800px 100%; animation: shimmer 1.2s infinite linear; border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade, .anim-drawer, .anim-drawer-left, .skeleton { animation: none; }
+}

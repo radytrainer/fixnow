@@ -1,0 +1,20 @@
+{
+  "name": "fixnow",
+  "private": true,
+  "description": "FixNow competition MVP: customer + technician Android app, admin web dashboard, shared REST API.",
+  "scripts": {
+    "install:all": "npm --prefix services/api install && npm --prefix apps/admin install && npm --prefix apps/mobile install && npm --prefix e2e install",
+    "db:init": "node scripts/local-db.mjs init",
+    "db:start": "node scripts/local-db.mjs start",
+    "db:stop": "node scripts/local-db.mjs stop",
+    "db:reset": "npm --prefix services/api run db:reset",
+    "api": "npm --prefix services/api run dev",
+    "admin": "npm --prefix apps/admin run dev",
+    "admin:prod": "npm --prefix apps/admin run build && npm --prefix apps/admin run start",
+    "mobile": "npm --prefix apps/mobile run start",
+    "mobile:web": "npm --prefix apps/mobile run web",
+    "test:api": "npm --prefix services/api test",
+    "test:e2e": "cd e2e && node flow.mjs && node flow2.mjs",
+    "typecheck": "npm --prefix services/api run typecheck && cd apps/mobile && npx tsc --noEmit && cd ../admin && npx tsc --noEmit"
+  }
+}

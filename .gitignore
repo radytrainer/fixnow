@@ -1,0 +1,22 @@
+node_modules/
+.env
+.env.local
+*.log
+
+# local database cluster and private uploads
+database/.pgdata/
+services/api/storage/
+services/api/storage-test/
+
+# build output
+apps/admin/.next/
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/android/
+apps/mobile/ios/
+scripts/.android-export/
+scripts/.*.log
+
+# e2e artefacts
+e2e/screenshots/
+e2e/id-photo.png

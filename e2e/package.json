@@ -1,0 +1,12 @@
+{
+  "name": "@fixnow/e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "node smoke.mjs",
+    "flow": "node flow.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.1"
+  }
+}
